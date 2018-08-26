@@ -2,7 +2,7 @@
 cc._RF.push(module, 'bf76a98LlJFXZBUix5A3DI0', 'Game', __filename);
 // script/Game.js
 
-"use strict";
+'use strict';
 
 // Learn cc.Class:
 //  - [Chinese] http://docs.cocos.com/creator/manual/zh/scripting/class.html
@@ -34,11 +34,24 @@ cc.Class({
         player: {
             default: null,
             type: cc.Node
+        },
+
+        socreDisplay: {
+            default: null,
+            type: cc.Label
+        },
+
+        scoreAudio: {
+            default: null,
+            type: cc.AudioClip
         }
     },
 
     onLoad: function onLoad() {
         this.groundY = this.ground.y + this.ground.height / 2;
+        this.score = 0;
+        this.timer = 0;
+        this.starDuration = 0;
         this.spawnNewStar();
     },
 
@@ -46,22 +59,43 @@ cc.Class({
         var newStar = cc.instantiate(this.starPrefab);
         this.node.addChild(newStar);
         newStar.setPosition(this.getNewStarPosition());
+        newStar.getComponent('Star').game = this;
+
+        this.starDuration = this.minStarDuration + Math.random() * (this.maxStarDuration - this.minStarDuration);
+        this.timer = 0;
     },
 
     getNewStarPosition: function getNewStarPosition() {
         var randX = 0;
         var randY = this.groundY + Math.random() * this.player.getComponent("Player").jumpHeight + 50;
 
-        var maxX = this.node.widht / 2;
+        var maxX = this.node.width / 2;
         randX = (Math.random() - 0.5) * 2 * maxX;
         return cc.v2(randX, randY);
     },
 
-    start: function start() {}
-}
+    start: function start() {},
 
-// update (dt) {},
-);
+
+    gainScore: function gainScore() {
+        this.score += 1, this.socreDisplay.string = 'Score:' + this.score;
+        cc.audioEngine.playEffect(this.scoreAudio, false);
+    },
+
+    gameOver: function gameOver() {
+        this.player.stopAllActions();
+        cc.director.loadScene('game');
+    },
+
+    update: function update(dt) {
+        if (this.timer > this.starDuration) {
+            this.gameOver();
+            return;
+        }
+
+        this.timer += dt;
+    }
+});
 
 cc._RF.pop();
         }

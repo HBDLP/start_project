@@ -16,14 +16,25 @@ cc.Class({
         jumpDuration: 0,
         maxMoveSpeed: 0,
         accel: 0,
+
+        jumpAudio:{
+            default:null,
+            type:cc.AudioClip,
+        },
     },
 
     setJumpAction:function()
     {
         var jumpUp = cc.moveBy(this.jumpDuration, cc.v2(0, this.jumpHeight)).easing(cc.easeCubicActionOut());
         var jumpDown = cc.moveBy(this.jumpDuration, cc.v2(0, -this.jumpHeight)).easing(cc.easeCubicActionIn());
-        
-        return cc.repeatForever(cc.sequence(jumpUp, jumpDown));
+        var callback = cc.callFunc(this.playJumpSound, this);
+
+        return cc.repeatForever(cc.sequence(jumpUp, jumpDown, callback));
+    },
+
+    playJumpSound:function()
+    {
+        cc.audioEngine.playEffect(this.jumpAudio, false);
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -41,6 +52,16 @@ cc.Class({
         }
     },
 
+    onTouchStart(event)
+    {
+        
+    },
+
+    onTouchEnd(event)
+    {
+
+    },
+    
     onKeyUp (event) {
         // unset a flag when key released
         switch(event.keyCode) {
@@ -64,11 +85,16 @@ cc.Class({
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp. this);
+        //cc.systemEvent.on(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
+        //cc.systemEvnet.on(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
     },
-
+    
     onDestroy(){
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
         cc.systemEvent.off(cc.SystemEvent.EventType.KEY_UP, this.onKeyUp, this);
+        //cc.systemEvent.off(cc.Node.EventType.TOUCH_START, this.onTouchStart, this);
+        //cc.systemEvent.off(cc.Node.EventType.TOUCH_END, this.onTouchEnd, this);
+
     },
 
     update: function(dt)

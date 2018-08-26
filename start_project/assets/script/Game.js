@@ -29,11 +29,24 @@ cc.Class({
             default:null,
             type:cc.Node,
         },
+
+        socreDisplay:{
+            default:null,
+            type:cc.Label,
+        },
+
+        scoreAudio:{
+            default:null,
+            type:cc.AudioClip,
+        },
     },
 
     onLoad:function()
     {
         this.groundY = this.ground.y + this.ground.height/2;
+        this.score = 0;
+        this.timer = 0;
+        this.starDuration = 0;
         this.spawnNewStar();
     },
 
@@ -42,13 +55,17 @@ cc.Class({
         var newStar = cc.instantiate(this.starPrefab);
         this.node.addChild(newStar);
         newStar.setPosition(this.getNewStarPosition());
+        newStar.getComponent('Star').game = this;
+
+        this.starDuration = this.minStarDuration + Math.random() * (this.maxStarDuration - this.minStarDuration);
+        this.timer = 0;
     },
 
     getNewStarPosition:function(){
         var randX = 0;
         var randY = this.groundY + Math.random() * this.player.getComponent("Player").jumpHeight + 50;
 
-        var maxX = this.node.widht/2;
+        var maxX = this.node.width/2;
         randX = (Math.random() - 0.5) * 2 * maxX;
         return cc.v2(randX, randY);
     },
@@ -57,5 +74,27 @@ cc.Class({
 
     },
 
-    // update (dt) {},
+    gainScore:function()
+    {
+        this.score += 1,
+        this.socreDisplay.string = 'Score:' + this.score;
+        cc.audioEngine.playEffect(this.scoreAudio, false);
+    },
+    
+    gameOver:function()
+    {
+        this.player.stopAllActions();
+        cc.director.loadScene('game');
+    },
+
+    update:function(dt)
+    {
+        if(this.timer > this.starDuration)
+        {
+            this.gameOver();
+            return;
+        }
+
+        this.timer += dt;
+    },
 });
